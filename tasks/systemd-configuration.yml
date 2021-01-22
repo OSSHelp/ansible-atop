@@ -1,0 +1,53 @@
+---
+
+- name: prepare systemd units
+  template:
+    src: systemd/{{ item }}.j2
+    dest: "/etc/systemd/system/{{ item }}"
+  with_items:
+    - atop-rotate.service
+    - atop-rotate.timer
+    - atop.service
+  notify:
+    - systemd reload
+    - services restart
+
+- name: check existence of /etc/cron.d/atop
+  stat:
+    path: /etc/cron.d/atop
+  register: check_crond_atop
+
+- name: comment out the unneeded cron task in /etc/cron.d/atop
+  replace:
+    path: /etc/cron.d/atop
+    regexp: '^0(.*)$'
+    replace: '# 0\1'
+  when: check_crond_atop.stat.exists
+  notify:
+    - cron restart
+
+- name: ensure systemd services are enabled
+  service:
+    name: "{{ item }}"
+    enabled: true
+  with_items:
+    - atop.service
+    - atop-rotate.service
+    - atop-rotate.timer
+
+- name: ensure systemd services are started
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - atop.service
+    - atop-rotate.timer
+
+- name: check if atop is enabled in SysV
+  stat:
+    path: /etc/rc2.d/S01atop
+  register: stat_result
+
+- name: disable atop in SysV
+  shell: update-rc.d -f atop remove
+  when: stat_result.stat.exists

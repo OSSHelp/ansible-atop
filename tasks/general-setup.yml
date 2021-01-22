@@ -1,0 +1,42 @@
+---
+
+- name: install packages
+  apt:
+    name: "{{ atop_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 86400
+
+- name: ensure atop service is started and enabled
+  service:
+    name: atop
+    enabled: true
+    state: started
+
+- name: acct service check
+  service:
+    name: acct
+    enabled: true
+  when: not atop_role_test_mode
+
+- name: set daemon interval
+  lineinfile:
+    dest: "{{ atop_paths.env_file | default('/etc/default/atop') }}"
+    regexp: 'LOGINTERVAL'
+    line: "LOGINTERVAL={{ atop_daemon_interval }}"
+    create: yes
+  notify: atop restart
+  when: not atop_role_test_mode
+
+- name: acct enable
+  lineinfile:
+    dest: /etc/default/atop
+    line: 'ATOPACCT=/var/log/account/pacct'
+    create: yes
+  notify: atop restart
+  when: not atop_role_test_mode
+
+- name: atoprc
+  template:
+    src: atoprc.j2
+    dest: /root/.atoprc

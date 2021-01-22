@@ -1,0 +1,22 @@
+---
+
+atop_packages:
+  - atop
+  - acct
+
+atop_daemon_interval: 300
+atop_user_interval: 1
+atop_flags: 1fpaA
+atop_maxlineintf: 3
+atop_memory_limit: 1073741824
+
+atop_paths:
+  systemd_main_service: /etc/systemd/system/atop.service
+  systemd_rotate_timer: /etc/systemd/system/atop-rotate.timer
+  systemd_rotate_service: /etc/systemd/system/atop-rotate.service
+  binary_path: /usr/bin/atop
+  log_dir: /var/log/atop
+  env_file: /etc/default/atop
+
+atop_disable_systemd_configuration: false
+atop_role_test_mode: false

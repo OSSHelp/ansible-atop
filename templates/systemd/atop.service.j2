@@ -1,0 +1,20 @@
+[Unit]
+Description=Atop advanced performance monitor
+Documentation=man:atop(1)
+
+[Service]
+Environment=LOGOPTS=""
+Environment=LOGINTERVAL=600
+Environment=LOGGENERATIONS=28
+Environment=LOGPATH={{ atop_paths.log_dir | default('/var/log/atop') }}
+EnvironmentFile={{ atop_paths.env_file | default('/etc/default/atop') }}
+ExecStartPre=/bin/sh -c 'test -n "$LOGINTERVAL" -a "$LOGINTERVAL" -eq "$LOGINTERVAL"'
+ExecStartPre=/bin/sh -c 'test -n "$LOGGENERATIONS" -a "$LOGGENERATIONS" -eq "$LOGGENERATIONS"'
+ExecStart=/bin/sh -c 'exec {{ atop_paths.binary_path | default('/usr/bin/atop') }} ${LOGOPTS} -w "${LOGPATH}/atop_$(date +%%Y%%m%%d)" ${LOGINTERVAL}'
+ExecStartPost=/usr/bin/find "${LOGPATH}" -name "atop_*" -mtime +${LOGGENERATIONS} -exec rm -v {} \;
+ExecStartPost=/bin/sh -c 'pgrep -x atop > /var/run/atop.pid; true'
+KillSignal=SIGUSR2
+MemoryLimit={{ atop_memory_limit | default('1073741824') }}
+
+[Install]
+WantedBy=multi-user.target

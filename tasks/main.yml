@@ -1,0 +1,9 @@
+---
+
+- name: general setup
+  include_tasks: general-setup.yml
+  when: ansible_virtualization_type != 'lxc' or atop_role_test_mode
+
+- name: configure for systemd
+  include_tasks: systemd-configuration.yml
+  when: atop_role_test_mode or ansible_virtualization_type != 'lxc' and ansible_service_mgr == 'systemd' and not atop_disable_systemd_configuration
