@@ -7,9 +7,8 @@ Simple Ansible role for atop installation.
 ## Usage (example)
 
 ```yaml
-    - { role: atop,
-        atop_daemon_interval: 60
-    }
+    - role: atop
+      atop_daemon_interval: 60
 ```
 
 ## Available parameters

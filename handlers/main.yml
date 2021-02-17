@@ -1,19 +1,14 @@
 ---
-- name: atop restart
+- name: restart atop service
   service:
     name: atop
     state: restarted
 
-- name: acct restart
-  service:
-    name: acct
-    state: restarted
-
-- name: systemd reload
+- name: reload atop unit
   systemd:
     daemon_reload: yes
 
-- name: services restart
+- name: restart atop services
   systemd:
     name: "{{ item }}"
     state: restarted
@@ -22,7 +17,7 @@
     - atop-rotate.service
     - atop-rotate.timer
 
-- name: cron restart
+- name: restart cron service from atop
   systemd:
     name: cron
     state: restarted

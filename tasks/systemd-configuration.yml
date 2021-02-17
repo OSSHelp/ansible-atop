@@ -9,8 +9,8 @@
     - atop-rotate.timer
     - atop.service
   notify:
-    - systemd reload
-    - services restart
+    - reload atop unit
+    - restart atop service
 
 - name: check existence of /etc/cron.d/atop
   stat:
@@ -24,7 +24,7 @@
     replace: '# 0\1'
   when: check_crond_atop.stat.exists
   notify:
-    - cron restart
+    - restart cron service from atop
 
 - name: ensure systemd services are enabled
   service:

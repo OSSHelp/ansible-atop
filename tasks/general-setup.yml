@@ -1,11 +1,19 @@
 ---
 
+# see https://oss.help/87382-16
+- name: mask atopacctd in LXD
+  systemd:
+    name: atopacct
+    masked: yes
+  when: ansible_virtualization_type == "lxc"
+
 - name: install packages
   apt:
-    name: "{{ atop_packages }}"
+    name: "{{ item }}"
     state: present
     update_cache: true
     cache_valid_time: 86400
+  loop: "{{ atop_packages }}"
 
 - name: ensure atop service is started and enabled
   service:
@@ -25,7 +33,7 @@
     regexp: 'LOGINTERVAL'
     line: "LOGINTERVAL={{ atop_daemon_interval }}"
     create: yes
-  notify: atop restart
+  notify: restart atop service
   when: not atop_role_test_mode
 
 - name: acct enable
@@ -33,7 +41,7 @@
     dest: /etc/default/atop
     line: 'ATOPACCT=/var/log/account/pacct'
     create: yes
-  notify: atop restart
+  notify: restart atop service
   when: not atop_role_test_mode
 
 - name: atoprc
